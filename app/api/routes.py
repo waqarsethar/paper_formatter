@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.api.schemas import (
@@ -13,7 +13,6 @@ from app.api.schemas import (
     JournalListResponse,
 )
 from app.core.pipeline import list_journals, load_journal_config, run_pipeline
-from app.services.email_service import send_formatted_document
 from app.services.file_service import cleanup_files, get_output_path, save_upload
 
 logger = logging.getLogger(__name__)
@@ -48,7 +47,6 @@ async def get_journal_config(journal_id: str):
 async def format_manuscript(
     file: UploadFile = File(...),
     journal_id: str = Form(...),
-    email: str = Form(...),
 ):
     # Validate file extension
     if not file.filename:
@@ -69,33 +67,29 @@ async def format_manuscript(
             None, run_pipeline, upload_path, journal_id, output_path
         )
 
+        fmt_warnings = [
+            FormattingWarning(step="pipeline", message=w)
+            for w in result.warnings
+        ]
+
         if not result.success:
             return FormatResponse(
                 success=False,
                 message=f"Formatting failed: {'; '.join(result.errors)}",
-                warnings=[
-                    FormattingWarning(step="pipeline", message=w)
-                    for w in result.warnings
-                ],
+                warnings=fmt_warnings,
                 stats=result.stats,
             )
 
-        # Send email
-        await send_formatted_document(
-            to_email=email,
-            original_filename=file.filename,
-            output_path=result.output_path,
-            warnings=result.warnings,
-        )
+        # Build download URL from output filename
+        output_filename = Path(result.output_path).name
+        download_url = f"/api/download/{output_filename}"
 
         return FormatResponse(
             success=True,
-            message=f"Formatted document sent to {email}",
-            warnings=[
-                FormattingWarning(step="pipeline", message=w)
-                for w in result.warnings
-            ],
+            message="Formatting complete! Download your formatted document below.",
+            warnings=fmt_warnings,
             stats=result.stats,
+            download_url=download_url,
         )
 
     except Exception as e:
@@ -104,3 +98,22 @@ async def format_manuscript(
 
     finally:
         cleanup_files(upload_path)
+
+
+@router.get("/api/download/{filename}")
+async def download_file(filename: str):
+    # Prevent path traversal
+    if ".." in filename or "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    output_dir = Path("output")
+    file_path = output_dir / filename
+
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )

@@ -480,6 +480,64 @@ footer p {
     color: var(--color-text-muted);
 }
 
+/* --- Download Button --- */
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-white);
+    background-color: var(--color-success);
+    border: none;
+    border-radius: var(--radius);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--transition), box-shadow var(--transition);
+}
+
+.btn-download:hover {
+    background-color: #2f855a;
+    box-shadow: 0 2px 8px rgba(56, 161, 105, 0.35);
+}
+
+.btn-download svg {
+    flex-shrink: 0;
+}
+
+/* --- Stats Grid --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.stat {
+    text-align: center;
+    padding: 0.5rem;
+    background: var(--color-white);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+}
+
+.stat-num {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* --- Optional Label --- */
+.label-optional {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
 /* --- Utility --- */
 .hidden {
     display: none !important;

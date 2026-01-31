@@ -5,8 +5,6 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from fastapi import HTTPException
-
 from config import settings
 
 
@@ -62,12 +60,6 @@ async def send_formatted_document(
     SMTP operations are run in an executor to avoid blocking the event loop.
     Raises HTTPException(500) on any failure.
     """
-    try:
-        msg = _build_message(to_email, original_filename, output_path, warnings)
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, _send_smtp, msg, to_email)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to send email: {exc}",
-        )
+    msg = _build_message(to_email, original_filename, output_path, warnings)
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, _send_smtp, msg, to_email)

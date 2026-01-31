@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const journalSelect = document.getElementById("journal-select");
   const journalPreview = document.getElementById("journal-preview");
   const previewContent = document.getElementById("preview-content");
-  const emailInput = document.getElementById("email-input");
   const form = document.getElementById("format-form");
   const submitBtn = document.getElementById("submit-btn");
   const loading = document.getElementById("loading");
@@ -62,13 +61,13 @@ document.addEventListener("DOMContentLoaded", () => {
       ["Page Size", (layout.page_size || "").toUpperCase()],
       ["Margins", `${layout.margins?.top}"/${layout.margins?.bottom}"/${layout.margins?.left}"/${layout.margins?.right}"`],
       ["Line Spacing", layout.line_spacing],
-      ["Body Font", `${fonts.body?.family || "—"} ${fonts.body?.size || ""}pt`],
-      ["Citation Style", cite.type ? cite.type.replace(/_/g, " ") : "—"],
-      ["Citation Format", cite.format || "—"],
-      ["Reference Numbering", ref.numbering || "—"],
+      ["Body Font", `${fonts.body?.family || "\u2014"} ${fonts.body?.size || ""}pt`],
+      ["Citation Style", cite.type ? cite.type.replace(/_/g, " ") : "\u2014"],
+      ["Citation Format", cite.format || "\u2014"],
+      ["Reference Numbering", ref.numbering || "\u2014"],
       ["Table Captions", `${tables.prefix || "Table"} (${tables.caption_position || "above"}), ${tables.numbering_format || "arabic"}`],
       ["Figure Captions", `${figures.prefix || "Figure"} (${figures.caption_position || "below"})`],
-      ["Abstract Max Words", abs.max_words || "—"],
+      ["Abstract Max Words", abs.max_words || "\u2014"],
     ];
 
     previewContent.innerHTML = rows
@@ -152,16 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Please select a target journal.");
       return;
     }
-    const email = emailInput.value.trim();
-    if (!email || !emailInput.checkValidity()) {
-      alert("Please enter a valid email address.");
-      return;
-    }
 
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("journal_id", journalSelect.value);
-    formData.append("email", email);
 
     showLoading(true);
     hideResult();
@@ -198,6 +191,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showSuccess(data) {
     let html = `<div class="result-success"><h3>Success</h3><p>${data.message}</p>`;
+
+    if (data.download_url) {
+      html += `<a href="${data.download_url}" class="btn-download" download>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Formatted Document
+      </a>`;
+    }
 
     if (data.stats) {
       html += `<div class="stats-grid">`;

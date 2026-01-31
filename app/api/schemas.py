@@ -37,6 +37,7 @@ class FormatResponse(BaseModel):
     message: str
     warnings: list[FormattingWarning] = []
     stats: FormattingStats | None = None
+    download_url: str | None = None
 
 
 class FormattingResult(BaseModel):
