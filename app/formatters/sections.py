@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.core.document_parser import get_all_sections
+from app.core.document_parser import get_all_sections, strip_heading_number
 
 
 def apply_section_order(doc, config) -> dict:
@@ -46,9 +46,9 @@ def apply_section_order(doc, config) -> dict:
     # Extract the current section headings that match any target name.
     current_headings: list[str] = []
     for section in sections:
-        heading_lower = section["heading"].strip().lower()
+        heading_lower = strip_heading_number(section["heading"]).lower()
         if heading_lower in target_lower:
-            current_headings.append(section["heading"].strip())
+            current_headings.append(strip_heading_number(section["heading"]))
 
     if not current_headings:
         warnings.append(

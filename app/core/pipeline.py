@@ -57,15 +57,19 @@ def run_pipeline(input_path: str, journal_id: str, output_path: str) -> Formatti
         # Load document
         doc = Document(docx_path)
 
-        # Run each formatter step, catching per-step errors
+        # Run each formatter step, catching per-step errors.
+        # Order matters: content-detecting steps (title_page, sections,
+        # citations, references) must run BEFORE headings numbering,
+        # because numbering prepends prefixes like "1. " that break
+        # heading-text matching.
         steps = [
             ("layout", lambda: apply_layout(doc, config)),
             ("fonts", lambda: apply_fonts(doc, config)),
-            ("headings", lambda: apply_headings(doc, config)),
             ("title_page", lambda: apply_title_page(doc, config)),
             ("sections", lambda: apply_section_order(doc, config)),
             ("citations", lambda: apply_citations(doc, config)),
             ("references", lambda: apply_references(doc, config)),
+            ("headings", lambda: apply_headings(doc, config)),
             ("tables", lambda: apply_tables(doc, config)),
             ("figures", lambda: apply_figures(doc, config)),
         ]

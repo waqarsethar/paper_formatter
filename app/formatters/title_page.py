@@ -40,13 +40,16 @@ def _find_title_paragraph(doc):
 def _find_abstract_paragraph(doc):
     """Return the paragraph that contains the abstract heading.
 
-    Looks for a paragraph whose text starts with "abstract" (case-insensitive)
-    or whose style name contains "abstract".
+    Looks for a paragraph whose text starts with "abstract" (case-insensitive),
+    whose style name contains "abstract", or that is a heading paragraph whose
+    stripped text equals "abstract".
     """
     for paragraph in doc.paragraphs:
         style_name = (paragraph.style.name or "").lower()
         text = paragraph.text.strip().lower()
-        if text.startswith("abstract") or "abstract" in style_name:
+        # Strip potential heading number prefix (e.g. "1. Abstract")
+        stripped = re.sub(r"^\d+[\.\)]\s*", "", text)
+        if stripped.startswith("abstract") or "abstract" in style_name:
             return paragraph
     return None
 
@@ -206,7 +209,7 @@ def apply_title_page(doc, config) -> dict:
     # ------------------------------------------------------------------
     # Keywords
     # ------------------------------------------------------------------
-    keywords_config = config.get("keywords", {})
+    keywords_config = config.get("keywords") or {}
     keywords_para = _find_keywords_paragraph(doc)
 
     if keywords_para is not None:

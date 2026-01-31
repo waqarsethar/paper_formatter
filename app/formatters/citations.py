@@ -15,8 +15,20 @@ from app.core.document_parser import get_heading_level, merge_paragraph_runs
 # ---------------------------------------------------------------------------
 
 # APA / author-year: (Smith, 2024), (Smith & Jones, 2024), (Smith et al., 2024b)
+# Also matches single entries within multi-citations like (Smith, 2020; Jones, 2019)
 AUTHOR_YEAR_RE = re.compile(
     r'\(([A-Z][a-z]+(?:\s(?:&|and)\s[A-Z][a-z]+)*(?:\set\sal\.)?),?\s*(\d{4}[a-z]?)\)'
+)
+
+# Multi-citation in one parenthesized group: (Smith, 2020; Jones & Brown, 2019)
+MULTI_AUTHOR_YEAR_RE = re.compile(
+    r'\(([A-Z][a-z]+(?:\s(?:&|and)\s[A-Z][a-z]+)*(?:\set\sal\.)?),?\s*\d{4}[a-z]?'
+    r'(?:\s*;\s*[A-Z][a-z]+(?:\s(?:&|and)\s[A-Z][a-z]+)*(?:\set\sal\.?)?,?\s*\d{4}[a-z]?)+\)'
+)
+
+# Individual citation within a multi-citation group
+INDIVIDUAL_AUTHOR_YEAR_RE = re.compile(
+    r'([A-Z][a-z]+(?:\s(?:&|and)\s[A-Z][a-z]+)*(?:\set\sal\.)?),?\s*(\d{4}[a-z]?)'
 )
 
 # Numeric bracket: [1], [1, 2], [1-3], [1; 2; 3]
@@ -68,7 +80,7 @@ def detect_input_style(doc) -> str:
         if body_seen > 20:
             break
         text = merge_paragraph_runs(para)
-        if AUTHOR_YEAR_RE.search(text):
+        if AUTHOR_YEAR_RE.search(text) or MULTI_AUTHOR_YEAR_RE.search(text):
             counts["author_year"] += 1
         if NUMERIC_BRACKET_RE.search(text):
             counts["numeric_bracket"] += 1
@@ -101,7 +113,31 @@ def extract_citations(doc, style: str) -> list[dict]:
         text = merge_paragraph_runs(para)
 
         if style == "author_year":
+            # First handle multi-citations like (Smith, 2020; Jones, 2019)
+            multi_matches = set()
+            for m in MULTI_AUTHOR_YEAR_RE.finditer(text):
+                full_match = m.group(0)
+                multi_matches.add((m.start(), m.end()))
+                # Extract individual citations from within
+                inner = full_match[1:-1]  # strip parens
+                for im in INDIVIDUAL_AUTHOR_YEAR_RE.finditer(inner):
+                    citations.append({
+                        "para_idx": idx,
+                        "match_text": full_match,
+                        "author": im.group(1),
+                        "year": im.group(2),
+                        "numbers": None,
+                        "_is_multi": True,
+                    })
+            # Then handle single citations, skipping spans already covered
             for m in AUTHOR_YEAR_RE.finditer(text):
+                # Skip if this match falls within a multi-citation
+                overlaps = any(
+                    ms <= m.start() and m.end() <= me
+                    for ms, me in multi_matches
+                )
+                if overlaps:
+                    continue
                 citations.append({
                     "para_idx": idx,
                     "match_text": m.group(0),
@@ -435,6 +471,9 @@ def apply_citations(doc, config: dict) -> dict:
 
     use_superscript = target_type == "superscript"
 
+    # Track multi-citations already replaced to avoid double-processing.
+    replaced_multi: set[tuple[int, str]] = set()
+
     for para_idx, para_cits in by_para.items():
         para = doc.paragraphs[para_idx]
 
@@ -449,6 +488,46 @@ def apply_citations(doc, config: dict) -> dict:
 
         for cit in para_cits_sorted:
             old = cit["match_text"]
+
+            # Handle multi-citations: collect all numbers for the group
+            if cit.get("_is_multi"):
+                multi_key = (para_idx, old)
+                if multi_key in replaced_multi:
+                    continue
+                replaced_multi.add(multi_key)
+
+                # Gather all numbers for this multi-citation
+                multi_nums = []
+                for c in para_cits:
+                    if c.get("_is_multi") and c["match_text"] == old:
+                        n = cit_map.get(c["match_text"])
+                        # Try by author+year key
+                        ay_key_str = f"({c['author']}, {c['year']})"
+                        n = cit_map.get(ay_key_str, n)
+                        # Try looking up by individual match
+                        for k, v in cit_map.items():
+                            if c["author"] and c["author"] in k and c["year"] and c["year"] in k:
+                                n = v
+                                break
+                        if isinstance(n, int):
+                            multi_nums.append(n)
+                if multi_nums:
+                    if use_superscript:
+                        new_text = ",".join(str(n) for n in multi_nums)
+                    else:
+                        nums_str = ", ".join(str(n) for n in multi_nums)
+                        new_text = target_fmt.format(num=nums_str)
+                    success = replace_in_runs(
+                        para, old, new_text, superscript=use_superscript
+                    )
+                    if success:
+                        reformatted += len(multi_nums)
+                    else:
+                        warnings.append(
+                            f"Could not replace multi-citation '{old}'; left unchanged."
+                        )
+                continue
+
             num = cit_map.get(old)
             if num is None:
                 warnings.append(

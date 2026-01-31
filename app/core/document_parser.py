@@ -6,6 +6,11 @@ import re
 from docx.document import Document
 
 
+def strip_heading_number(text: str) -> str:
+    """Strip leading number prefixes like '1. ', '1.2 ', '1.2.3 ' from heading text."""
+    return re.sub(r"^\d+(?:\.\d+)*[\.\)]\s*", "", text.strip())
+
+
 # Common reference-section heading variants (lowercase for comparison).
 _REFERENCE_HEADINGS = {
     "references",
@@ -63,7 +68,7 @@ def is_reference_heading(text: str) -> bool:
     Returns:
         ``True`` if *text* is a recognised reference heading.
     """
-    return text.strip().lower() in _REFERENCE_HEADINGS
+    return strip_heading_number(text).lower() in _REFERENCE_HEADINGS
 
 
 def get_all_sections(doc: Document) -> list[dict]:
@@ -129,7 +134,8 @@ def find_section_by_heading(
     sections = get_all_sections(doc)
 
     for section in sections:
-        if section["heading"].strip().lower() in normalised:
+        heading_text = strip_heading_number(section["heading"]).lower()
+        if heading_text in normalised:
             return (section["start"], section["end"])
 
     return None
