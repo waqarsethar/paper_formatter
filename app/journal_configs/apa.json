@@ -1,0 +1,48 @@
+{
+  "name": "APA 7th Edition",
+  "description": "American Psychological Association 7th edition manuscript format",
+  "page_layout": {
+    "margins": {"top": 1.0, "bottom": 1.0, "left": 1.0, "right": 1.0},
+    "page_size": "letter",
+    "line_spacing": 2.0,
+    "columns": 1
+  },
+  "fonts": {
+    "body": {"family": "Times New Roman", "size": 12},
+    "heading_1": {"family": "Times New Roman", "size": 12, "bold": true, "italic": false, "color": "#000000", "spacing_before": 12, "spacing_after": 6, "alignment": "center"},
+    "heading_2": {"family": "Times New Roman", "size": 12, "bold": true, "italic": false, "color": "#000000", "spacing_before": 12, "spacing_after": 6, "alignment": "left"},
+    "heading_3": {"family": "Times New Roman", "size": 12, "bold": true, "italic": true, "color": "#000000", "spacing_before": 12, "spacing_after": 6, "alignment": "left"},
+    "heading_numbering": false
+  },
+  "title_page": {
+    "title": {"font_size": 16, "bold": true, "alignment": "center", "all_caps": false},
+    "authors": {"font_size": 12, "bold": false, "alignment": "center"},
+    "affiliation": {"font_size": 10, "italic": true, "alignment": "center"}
+  },
+  "abstract": {"heading_text": "Abstract", "font_size": 12, "max_words": 250},
+  "keywords": {"heading_text": "Keywords:", "italic": true, "separator": ", "},
+  "citation_style": {
+    "type": "author_year",
+    "format": "({author}, {year})",
+    "sort": "alphabetical"
+  },
+  "reference_style": {
+    "numbering": "unnumbered",
+    "format": "{authors} ({year}). {title}. {journal}, {volume}({issue}), {pages}. {doi}",
+    "hanging_indent": 0.5,
+    "font_size": 12
+  },
+  "tables": {
+    "caption_position": "above",
+    "prefix": "Table",
+    "numbering_format": "arabic",
+    "border_style": "all"
+  },
+  "figures": {
+    "caption_position": "below",
+    "prefix": "Figure",
+    "numbering_format": "arabic",
+    "caption_font_size": 10
+  },
+  "section_order": ["Introduction", "Methods", "Results", "Discussion", "Conclusion", "References"]
+}

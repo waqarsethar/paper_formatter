@@ -1,0 +1,48 @@
+{
+  "name": "Nature",
+  "description": "Nature journal manuscript format for submission",
+  "page_layout": {
+    "margins": {"top": 1.0, "bottom": 1.0, "left": 1.0, "right": 1.0},
+    "page_size": "A4",
+    "line_spacing": 2.0,
+    "columns": 1
+  },
+  "fonts": {
+    "body": {"family": "Times New Roman", "size": 12},
+    "heading_1": {"family": "Times New Roman", "size": 14, "bold": true, "italic": false, "color": "#000000", "spacing_before": 12, "spacing_after": 6, "alignment": "left"},
+    "heading_2": {"family": "Times New Roman", "size": 12, "bold": true, "italic": false, "color": "#000000", "spacing_before": 12, "spacing_after": 6, "alignment": "left"},
+    "heading_3": {"family": "Times New Roman", "size": 12, "bold": false, "italic": true, "color": "#000000", "spacing_before": 12, "spacing_after": 6, "alignment": "left"},
+    "heading_numbering": false
+  },
+  "title_page": {
+    "title": {"font_size": 16, "bold": true, "alignment": "center", "all_caps": false},
+    "authors": {"font_size": 12, "bold": false, "alignment": "center"},
+    "affiliation": {"font_size": 10, "italic": true, "alignment": "center"}
+  },
+  "abstract": {"heading_text": "Abstract", "font_size": 12, "max_words": 150},
+  "keywords": null,
+  "citation_style": {
+    "type": "superscript",
+    "format": "{num}",
+    "sort": "order_of_appearance"
+  },
+  "reference_style": {
+    "numbering": "numbered",
+    "format": "{num}. {authors}. {title}. {journal} {volume}, {pages} ({year}).",
+    "hanging_indent": 0,
+    "font_size": 10
+  },
+  "tables": {
+    "caption_position": "above",
+    "prefix": "Table",
+    "numbering_format": "arabic",
+    "border_style": "top_bottom"
+  },
+  "figures": {
+    "caption_position": "below",
+    "prefix": "Figure",
+    "numbering_format": "arabic",
+    "caption_font_size": 10
+  },
+  "section_order": ["Introduction", "Results", "Discussion", "Methods", "References"]
+}
