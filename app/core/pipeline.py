@@ -8,13 +8,18 @@ from app.api.schemas import FormattingResult, FormattingStats
 from app.core.doc_converter import convert_doc_to_docx
 from app.formatters.layout import apply_layout
 from app.formatters.fonts import apply_fonts
+from app.formatters.footnotes import apply_footnotes
 from app.formatters.headings import apply_headings
 from app.formatters.title_page import apply_title_page
+from app.formatters.abstract import apply_abstract
+from app.formatters.keywords import apply_keywords
 from app.formatters.sections import apply_section_order
 from app.formatters.citations import apply_citations
 from app.formatters.references import apply_references
+from app.formatters.appendix import apply_appendix
 from app.formatters.tables import apply_tables
 from app.formatters.figures import apply_figures
+from app.formatters.equations import apply_equations
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +49,9 @@ def run_pipeline(input_path: str, journal_id: str, output_path: str) -> Formatti
     stats = FormattingStats(
         citations_found=0, citations_reformatted=0,
         references_found=0, references_reformatted=0,
-        tables_found=0, figures_found=0
+        tables_found=0, figures_found=0, equations_found=0,
+        footnotes_found=0, abstract_word_count=0,
+        keywords_count=0, appendices_found=0
     )
 
     try:
@@ -58,20 +65,27 @@ def run_pipeline(input_path: str, journal_id: str, output_path: str) -> Formatti
         doc = Document(docx_path)
 
         # Run each formatter step, catching per-step errors.
-        # Order matters: content-detecting steps (title_page, sections,
-        # citations, references) must run BEFORE headings numbering,
-        # because numbering prepends prefixes like "1. " that break
-        # heading-text matching.
+        # Order matters: content-detecting steps (title_page, abstract,
+        # keywords, sections, citations, references, appendix) must run
+        # BEFORE headings numbering, because numbering prepends prefixes
+        # like "1. " that break heading-text matching.
+        # Footnotes runs early (can appear anywhere in document).
+        # Appendix runs AFTER headings (needs final heading format).
         steps = [
             ("layout", lambda: apply_layout(doc, config)),
             ("fonts", lambda: apply_fonts(doc, config)),
+            ("footnotes", lambda: apply_footnotes(doc, config)),
             ("title_page", lambda: apply_title_page(doc, config)),
+            ("abstract", lambda: apply_abstract(doc, config)),
+            ("keywords", lambda: apply_keywords(doc, config)),
             ("sections", lambda: apply_section_order(doc, config)),
             ("citations", lambda: apply_citations(doc, config)),
             ("references", lambda: apply_references(doc, config)),
             ("headings", lambda: apply_headings(doc, config)),
+            ("appendix", lambda: apply_appendix(doc, config)),
             ("tables", lambda: apply_tables(doc, config)),
             ("figures", lambda: apply_figures(doc, config)),
+            ("equations", lambda: apply_equations(doc, config)),
         ]
 
         for step_name, step_fn in steps:

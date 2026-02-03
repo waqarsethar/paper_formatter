@@ -30,6 +30,11 @@ class FormattingStats(BaseModel):
     references_reformatted: int
     tables_found: int
     figures_found: int
+    equations_found: int
+    footnotes_found: int = 0
+    abstract_word_count: int = 0
+    keywords_count: int = 0
+    appendices_found: int = 0
 
 
 class FormatResponse(BaseModel):

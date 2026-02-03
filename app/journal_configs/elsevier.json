@@ -20,8 +20,23 @@
     "authors": {"font_size": 12, "bold": false, "alignment": "center"},
     "affiliation": {"font_size": 10, "italic": true, "alignment": "center"}
   },
-  "abstract": {"heading_text": "Abstract", "font_size": 12, "max_words": 300},
-  "keywords": {"heading_text": "Keywords:", "separator": "; "},
+  "abstract": {
+    "heading_text": "Abstract",
+    "font_size": 12,
+    "max_words": 300,
+    "alignment": "left",
+    "bold_heading": true,
+    "indent_body": 0.0,
+    "spacing_after_heading": 6
+  },
+  "keywords": {
+    "heading_text": "Keywords:",
+    "separator": "; ",
+    "italic": false,
+    "font_size": 12,
+    "alignment": "left",
+    "max_keywords": null
+  },
   "citation_style": {
     "type": "author_year",
     "format": "({author}, {year})",
@@ -44,6 +59,32 @@
     "prefix": "Fig.",
     "numbering_format": "arabic",
     "caption_font_size": 9
+  },
+  "equations": {
+    "numbering": "sequential",
+    "numbering_format": "arabic",
+    "prefix": "",
+    "number_format_template": "({num})",
+    "alignment": "center",
+    "spacing_before": 6,
+    "spacing_after": 6,
+    "font_size": null
+  },
+  "appendix": {
+    "format": "letter",
+    "heading_prefix": "Appendix",
+    "numbering_format": "{prefix} {label}",
+    "detect_subsections": true,
+    "table_numbering": "{label}{num}",
+    "figure_numbering": "{label}{num}"
+  },
+  "footnotes": {
+    "numbering_format": "arabic",
+    "restart_each_section": false,
+    "font_size": 10,
+    "max_per_page": 5,
+    "position": "bottom_of_page",
+    "separator_line": true
   },
   "section_order": ["Introduction", "Methods", "Results", "Discussion", "Conclusion", "References"]
 }

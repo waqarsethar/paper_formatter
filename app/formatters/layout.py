@@ -80,9 +80,13 @@ def apply_layout(doc, config):
     columns = layout.get("columns", 1)
     if columns > 1:
         warnings.append(
-            f"Column layout ({columns} columns) requested but python-docx "
-            "cannot easily apply multi-column formatting. "
-            "Manual adjustment may be required."
+            f"Two-column layout ({columns} columns) requested. "
+            "python-docx cannot apply multi-column formatting automatically. "
+            "After downloading the formatted document:\n"
+            "1. Open in Microsoft Word\n"
+            "2. Select all content (Ctrl+A)\n"
+            "3. Go to Layout → Columns → Two Columns\n"
+            "4. Save the document"
         )
     stats["columns"] = columns
 
